@@ -22,9 +22,9 @@ type workspaceLogger struct {
 	source        LogSource
 }
 
-func (pl *workspaceLogger) Write(p []byte) (n int, err error) {
-	if pl.logFile == nil {
-		filePath := filepath.Join(pl.logsDir, pl.workspaceId, "log")
+func (w *workspaceLogger) Write(p []byte) (n int, err error) {
+	if w.logFile == nil {
+		filePath := filepath.Join(w.logsDir, w.workspaceId, "log")
 		err = os.MkdirAll(filepath.Dir(filePath), 0755)
 		if err != nil {
 			return len(p), err
@@ -34,14 +34,14 @@ func (pl *workspaceLogger) Write(p []byte) (n int, err error) {
 		if err != nil {
 			return len(p), err
 		}
-		pl.logFile = logFile
-		pl.logger.SetOutput(pl.logFile)
+		w.logFile = logFile
+		w.logger.SetOutput(w.logFile)
 	}
 
 	var entry LogEntry
 	entry.Msg = string(p)
-	entry.Source = string(pl.source)
-	entry.WorkspaceName = &pl.workspaceName
+	entry.Source = string(w.source)
+	entry.WorkspaceName = &w.workspaceName
 	entry.Time = time.Now().Format(time.RFC3339)
 
 	b, err := json.Marshal(entry)
@@ -51,7 +51,7 @@ func (pl *workspaceLogger) Write(p []byte) (n int, err error) {
 
 	b = append(b, []byte(LogDelimiter)...)
 
-	_, err = pl.logFile.Write(b)
+	_, err = w.logFile.Write(b)
 	if err != nil {
 		return len(p), err
 	}
@@ -59,17 +59,17 @@ func (pl *workspaceLogger) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func (pl *workspaceLogger) Close() error {
-	if pl.logFile != nil {
-		err := pl.logFile.Close()
-		pl.logFile = nil
+func (w *workspaceLogger) Close() error {
+	if w.logFile != nil {
+		err := w.logFile.Close()
+		w.logFile = nil
 		return err
 	}
 	return nil
 }
 
-func (pl *workspaceLogger) Cleanup() error {
-	workspaceLogsDir := filepath.Join(pl.logsDir, pl.workspaceId)
+func (w *workspaceLogger) Cleanup() error {
+	workspaceLogsDir := filepath.Join(w.logsDir, w.workspaceId)
 
 	_, err := os.Stat(workspaceLogsDir)
 	if os.IsNotExist(err) {
@@ -81,7 +81,7 @@ func (pl *workspaceLogger) Cleanup() error {
 	return os.RemoveAll(workspaceLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateWorkspaceLogger(workspaceId, workspaceName string, source LogSource) Logger {
+func (l *loggerFactory) CreateWorkspaceLogger(workspaceId, workspaceName string, source LogSource) (Logger, error) {
 	logger := logrus.New()
 
 	return &workspaceLogger{
@@ -90,10 +90,10 @@ func (l *loggerFactoryImpl) CreateWorkspaceLogger(workspaceId, workspaceName str
 		workspaceName: workspaceName,
 		logger:        logger,
 		source:        source,
-	}
+	}, nil
 }
 
-func (l *loggerFactoryImpl) CreateWorkspaceLogReader(workspaceId string) (io.Reader, error) {
+func (l *loggerFactory) CreateWorkspaceLogReader(workspaceId string) (io.Reader, error) {
 	filePath := filepath.Join(l.targetLogsDir, workspaceId, "log")
 	return os.Open(filePath)
 }

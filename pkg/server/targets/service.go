@@ -26,7 +26,7 @@ type TargetServiceConfig struct {
 	ServerApiUrl     string
 	ServerUrl        string
 	ServerVersion    string
-	LoggerFactory    logs.LoggerFactory
+	LoggerFactory    logs.ILoggerFactory
 	TelemetryService telemetry.TelemetryService
 }
 
@@ -60,7 +60,7 @@ type TargetService struct {
 	serverApiUrl     string
 	serverUrl        string
 	serverVersion    string
-	loggerFactory    logs.LoggerFactory
+	loggerFactory    logs.ILoggerFactory
 	telemetryService telemetry.TelemetryService
 }
 

@@ -94,7 +94,7 @@ type Runner struct {
 }
 
 func (r *Runner) Start(ctx context.Context) error {
-	if r.Id != "local" {
+	if r.Config.Id != "local" {
 		r.initLogs()
 		log.SetLevel(log.InfoLevel)
 	}
@@ -182,7 +182,7 @@ func (r *Runner) CheckAndRunJobs(ctx context.Context) error {
 func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 	var job jobs.IJob
 
-	r.LogWriter.Write([]byte(fmt.Sprintf("Running job %s - %s - %s\n", j.Id, j.ResourceType, j.Action)))
+	log.Info(fmt.Sprintf("Running job %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
 
 	err := r.updateJobState(ctx, j.Id, models.JobStateRunning, nil)
 	if err != nil {
@@ -204,11 +204,11 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 
 	err = job.Execute(ctx)
 	if err != nil {
-		r.LogWriter.Write([]byte(fmt.Sprintf("Job failed %s - %s - %s\n", j.Id, j.ResourceType, j.Action)))
+		log.Info(fmt.Sprintf("Job failed %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
 		return r.updateJobState(ctx, j.Id, models.JobStateError, &err)
 	}
 
-	r.LogWriter.Write([]byte(fmt.Sprintf("Job successful %s - %s - %s\n", j.Id, j.ResourceType, j.Action)))
+	log.Info(fmt.Sprintf("Job successful %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
 	return r.updateJobState(ctx, j.Id, models.JobStateSuccess, nil)
 }
 

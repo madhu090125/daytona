@@ -21,7 +21,10 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	workspaceLogger := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	workspaceLogger, err := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	if err != nil {
+		return err
+	}
 	defer workspaceLogger.Close()
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))

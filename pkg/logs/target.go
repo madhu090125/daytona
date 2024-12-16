@@ -80,7 +80,7 @@ func (w *targetLogger) Cleanup() error {
 	return os.RemoveAll(targetLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateTargetLogger(targetId, targetName string, source LogSource) Logger {
+func (l *loggerFactory) CreateTargetLogger(targetId, targetName string, source LogSource) (Logger, error) {
 	logger := logrus.New()
 
 	return &targetLogger{
@@ -89,10 +89,10 @@ func (l *loggerFactoryImpl) CreateTargetLogger(targetId, targetName string, sour
 		logsDir:    l.targetLogsDir,
 		logger:     logger,
 		source:     source,
-	}
+	}, nil
 }
 
-func (l *loggerFactoryImpl) CreateTargetLogReader(targetId string) (io.Reader, error) {
+func (l *loggerFactory) CreateTargetLogReader(targetId string) (io.Reader, error) {
 	filePath := filepath.Join(l.targetLogsDir, targetId, "log")
 	return os.Open(filePath)
 }

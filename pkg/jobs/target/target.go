@@ -22,7 +22,7 @@ type TargetJob struct {
 	trackTelemetryEvent          func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 	updateTargetProviderMetadata func(ctx context.Context, targetId, providerMetadata string) error
 
-	loggerFactory   logs.LoggerFactory
+	loggerFactory   logs.ILoggerFactory
 	providerManager providermanager.IProviderManager
 }
 

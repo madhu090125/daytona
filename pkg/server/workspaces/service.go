@@ -30,7 +30,7 @@ type WorkspaceServiceConfig struct {
 	CreateJob              func(ctx context.Context, workspaceId string, runnerId string, action models.JobAction) error
 	TrackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
-	LoggerFactory         logs.LoggerFactory
+	LoggerFactory         logs.ILoggerFactory
 	ServerApiUrl          string
 	ServerUrl             string
 	ServerVersion         string
@@ -83,7 +83,7 @@ type WorkspaceService struct {
 	serverVersion         string
 	defaultWorkspaceImage string
 	defaultWorkspaceUser  string
-	loggerFactory         logs.LoggerFactory
+	loggerFactory         logs.ILoggerFactory
 }
 
 func (s *WorkspaceService) GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error) {

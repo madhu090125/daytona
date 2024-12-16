@@ -45,15 +45,29 @@ type RemoteRunnerParams struct {
 type RemoteJobFactoryParams struct {
 	ApiClient        *apiclient.APIClient
 	ServerConfig     *apiclient.ServerConfig
+	RunnerConfig     *runner.Config
 	ConfigDir        string
+	LoggerFactory    logs.ILoggerFactory
 	TelemetryService telemetry.TelemetryService
 }
 
 func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
+	targetLogsDir, err := server.GetTargetLogsDir(params.ConfigDir)
+	if err != nil {
+		return nil, err
+	}
+	buildLogsDir, err := build.GetBuildLogsDir()
+	if err != nil {
+		return nil, err
+	}
+	loggerFactory := logs.NewRemoteLoggerFactory(&targetLogsDir, &buildLogsDir, params.RunnerConfig.ServerApiUrl, params.RunnerConfig.ServerApiKey)
+
 	jobFactoryParams := RemoteJobFactoryParams{
 		ApiClient:        params.ApiClient,
 		ServerConfig:     params.ServerConfig,
+		RunnerConfig:     params.RunnerConfig,
 		ConfigDir:        params.ConfigDir,
+		LoggerFactory:    loggerFactory,
 		TelemetryService: params.TelemetryService,
 	}
 
@@ -206,16 +220,6 @@ func getRemoteDaytonaScriptUrl(serverUrl string) string {
 }
 
 func getRemoteWorkspaceJobFactory(params RemoteJobFactoryParams) (workspace.IWorkspaceJobFactory, error) {
-	targetLogsDir, err := server.GetTargetLogsDir(params.ConfigDir)
-	if err != nil {
-		return nil, err
-	}
-	buildLogsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
-	loggerFactory := logs.NewLoggerFactory(&targetLogsDir, &buildLogsDir)
-
 	providerManager := providermanager.GetProviderManager(nil)
 
 	return workspace.NewWorkspaceJobFactory(workspace.WorkspaceJobFactoryConfig{
@@ -256,23 +260,13 @@ func getRemoteWorkspaceJobFactory(params RemoteJobFactoryParams) (workspace.IWor
 		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
 			return params.TelemetryService.TrackServerEvent(event, clientId, props)
 		},
-		LoggerFactory:   loggerFactory,
+		LoggerFactory:   params.LoggerFactory,
 		ProviderManager: providerManager,
 		BuilderImage:    params.ServerConfig.BuilderImage,
 	}), nil
 }
 
 func getRemoteTargetJobFactory(params RemoteJobFactoryParams) (target.ITargetJobFactory, error) {
-	targetLogsDir, err := server.GetTargetLogsDir(params.ConfigDir)
-	if err != nil {
-		return nil, err
-	}
-	buildLogsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
-	loggerFactory := logs.NewLoggerFactory(&targetLogsDir, &buildLogsDir)
-
 	providerManager := providermanager.GetProviderManager(nil)
 
 	return target.NewTargetJobFactory(target.TargetJobFactoryConfig{
@@ -295,7 +289,7 @@ func getRemoteTargetJobFactory(params RemoteJobFactoryParams) (target.ITargetJob
 		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
 			return params.TelemetryService.TrackServerEvent(event, clientId, props)
 		},
-		LoggerFactory:   loggerFactory,
+		LoggerFactory:   params.LoggerFactory,
 		ProviderManager: providerManager,
 	}), nil
 }

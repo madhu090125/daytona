@@ -29,7 +29,7 @@ type WorkspaceJobFactoryConfig struct {
 	UpdateWorkspaceProviderMetadata  func(ctx context.Context, workspaceId, providerMetadata string) error
 	TrackTelemetryEvent              func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
-	LoggerFactory   logs.LoggerFactory
+	LoggerFactory   logs.ILoggerFactory
 	ProviderManager providermanager.IProviderManager
 	BuilderImage    string
 }

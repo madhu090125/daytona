@@ -78,7 +78,7 @@ func (bl *buildLogger) Cleanup() error {
 	return os.RemoveAll(buildLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateBuildLogger(buildId string, source LogSource) Logger {
+func (l *loggerFactory) CreateBuildLogger(buildId string, source LogSource) (Logger, error) {
 	logger := logrus.New()
 
 	return &buildLogger{
@@ -86,10 +86,10 @@ func (l *loggerFactoryImpl) CreateBuildLogger(buildId string, source LogSource) 
 		buildId: buildId,
 		logger:  logger,
 		source:  source,
-	}
+	}, nil
 }
 
-func (l *loggerFactoryImpl) CreateBuildLogReader(buildId string) (io.Reader, error) {
+func (l *loggerFactory) CreateBuildLogReader(buildId string) (io.Reader, error) {
 	filePath := filepath.Join(l.buildLogsDir, buildId, "log")
 	return os.Open(filePath)
 }

@@ -19,7 +19,11 @@ func (tj *TargetJob) delete(ctx context.Context, j *models.Job, force bool) erro
 		return err
 	}
 
-	targetLogger := tj.loggerFactory.CreateTargetLogger(t.Id, t.Name, logs.LogSourceServer)
+	targetLogger, err := tj.loggerFactory.CreateTargetLogger(t.Id, t.Name, logs.LogSourceServer)
+	if err != nil {
+		return err
+	}
+	defer targetLogger.Close()
 
 	targetLogger.Write([]byte(fmt.Sprintf("Destroying target %s", t.Name)))
 

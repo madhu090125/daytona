@@ -19,7 +19,10 @@ func (tj *TargetJob) start(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	targetLogger := tj.loggerFactory.CreateTargetLogger(tg.Id, tg.Name, logs.LogSourceServer)
+	targetLogger, err := tj.loggerFactory.CreateTargetLogger(tg.Id, tg.Name, logs.LogSourceServer)
+	if err != nil {
+		return err
+	}
 	defer targetLogger.Close()
 
 	targetLogger.Write([]byte("Starting target\n"))

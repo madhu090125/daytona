@@ -24,7 +24,7 @@ type WorkspaceJob struct {
 	getWorkspaceEnvironmentVariables func(ctx context.Context, w *models.Workspace) (map[string]string, error)
 	trackTelemetryEvent              func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
-	loggerFactory   logs.LoggerFactory
+	loggerFactory   logs.ILoggerFactory
 	providerManager providermanager.IProviderManager
 	builderImage    string
 }
