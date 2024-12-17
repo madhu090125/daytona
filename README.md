@@ -28,7 +28,7 @@
 </div>
 
 
-<h1 align="center">The Open Source Development Environment Manager</h1>
+<h1 align="center">The Open Source Development Environment Managers</h1>
 <div align="center">
 Set up a development environment on any infrastructure, with a single command.
 </div>
